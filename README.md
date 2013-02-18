@@ -7,6 +7,16 @@ This project is described at greater length in my blog post on [Tracking TDD Rem
 
 
 
+
+### Testing
+
+This reporter is known to work with the following versions of Jasmine:
+
+1.0.0.rc1 revision 1282853377
+1.3.0 revision 1354052693
+
+Other versions will likely work, but have not been tested.
+
 ### License
 
 Portions of this repo are taken from the Jasmine JSReporter project by Ivan De Marino. Those portions (indicated by comments in the code) are included under the terms of the license below. All other portions are my own work, and are available under the MIT license.

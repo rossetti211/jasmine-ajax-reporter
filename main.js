@@ -170,27 +170,32 @@ github.com/rossetti211
 and adds functionality to send JSON results to a server endpoint.
 */
 
+var TARGET_DOMAIN = "YOUR_DOMAIN_HERE"; // localhost:3000 or www.example.org
+
 var original = jasmine.JSReporter.prototype.reportRunnerResults;
-jasmine.JSReporter.prototype.reportSpecResults = function () {}
+// prevent the original behavior of logging everything to the console
+jasmine.JSReporter.prototype.reportSpecResults = function () {};
 jasmine.JSReporter.prototype.reportRunnerResults = function (runner) {
   original.apply(this, arguments);
-  jasmine.sendJSReport = function () {
-    var data = jasmine.getJSReport();
-    data.users = [];
-    data.users.push(sessionStorage.user1)
-    data.users.push(sessionStorage.user2)
-    $.post('http://bookstrap.meteor.com/specreports/jasmine', data, function () {
-      console.log('Data sent.');
-    });
-  };
+  // send the results on page load as long as the users are logged in
   if(sessionStorage.loggedin) {
     jasmine.sendJSReport();
-    $('body').prepend("<div>Logged in as [" + sessionStorage.user1 + " " + sessionStorage.user2 + "]</div><div><button id='logout'>Logout Current Students</button></div>");
+    $('body').prepend("<div>Logged in as [" + sessionStorage.user1 + " " + sessionStorage.user2 + "]" +
+      "</div><div><button id='logout'>Logout Current Students</button></div>");
     $('#logout').on('click', function (e) {
       sessionStorage.clear();
       history.go(0);
-    })
+    });
   }
+};
+jasmine.sendJSReport = function () {
+  var data = jasmine.getJSReport();
+  data.users = [];
+  data.users.push(sessionStorage.user1);
+  data.users.push(sessionStorage.user2);
+  $.post('http://'+ TARGET_DOMAIN + '/specreports/jasmine', data, function () {
+    console.log('Test report sent.');
+  });
 };
 
 // export public
@@ -198,9 +203,13 @@ jasmine.AJAXReporter = jasmine.JSReporter;
 jasmine.getEnv().addReporter(new jasmine.AJAXReporter());
 
 // require user login to run tests
+// usernames are a useful way to track the source of tests on the server
 $(document).ready(function () {
+  // create a login form if users haven't logged in (two usernames for pair programming)
   if(!sessionStorage.loggedin){
-    $('body').prepend("<form><input id='student1' type='text' placeholder='GitHub Username 1'></input><input id='student2' type='text' placeholder='GitHub Username 2'></input><input id='loginsubmit' type='submit'></input></form>")
+    $('body').prepend("<form><input id='student1' type='text' placeholder='GitHub Username 1'>" +
+      "</input><input id='student2' type='text' placeholder='GitHub Username 2'></input>" +
+      "<input id='loginsubmit' type='submit'></input></form>");
   }
 
   $('#loginsubmit').on('click', function (e) {
@@ -213,7 +222,7 @@ $(document).ready(function () {
       sessionStorage.loggedin = true;
       jasmine.getEnv().execute();
     } else {
-      console.log('Please enter at least one GitHub username.')
+      console.log('Please enter at least one GitHub username.');
     }
   });
 });
