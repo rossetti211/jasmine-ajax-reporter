@@ -170,7 +170,7 @@ github.com/rossetti211
 and adds functionality to send JSON results to a server endpoint.
 */
 
-var TARGET_DOMAIN = "YOUR_DOMAIN_HERE"; // localhost:3000 or www.example.org
+var TARGET_DOMAIN = "YOUR_DOMAIN_HERE"; // "localhost:3000" or "www.example.org"
 
 var original = jasmine.JSReporter.prototype.reportRunnerResults;
 // prevent the original behavior of logging everything to the console
@@ -184,7 +184,7 @@ jasmine.JSReporter.prototype.reportRunnerResults = function (runner) {
       "</div><div><button id='logout'>Logout Current Students</button></div>");
     $('#logout').on('click', function (e) {
       sessionStorage.clear();
-      history.go(0);
+      history.go(0); // reload the page to render the login form at the top
     });
   }
 };
@@ -193,9 +193,7 @@ jasmine.sendJSReport = function () {
   data.users = [];
   data.users.push(sessionStorage.user1);
   data.users.push(sessionStorage.user2);
-  $.post('http://'+ TARGET_DOMAIN + '/specreports/jasmine', data, function () {
-    console.log('Test report sent.');
-  });
+  $.post('http://'+ TARGET_DOMAIN + '/specreports/jasmine', data);
 };
 
 // export public
@@ -210,19 +208,20 @@ $(document).ready(function () {
     $('body').prepend("<form><input id='student1' type='text' placeholder='GitHub Username 1'>" +
       "</input><input id='student2' type='text' placeholder='GitHub Username 2'></input>" +
       "<input id='loginsubmit' type='submit'></input></form>");
+    alert('Please enter at least one GitHub username in the form at the top of the screen to begin testing.');
   }
 
   $('#loginsubmit').on('click', function (e) {
     e.preventDefault();
-    history.go(0);
-    sessionStorage.clear();
+    history.go(0); // refresh the page to run the tests when 'submit' is clicked
+    sessionStorage.clear(); // clear any previous login usernames
     sessionStorage.user1 = $('#student1').val();
     sessionStorage.user2 = $('#student2').val();
     if(sessionStorage.user1 || sessionStorage.user2){
       sessionStorage.loggedin = true;
       jasmine.getEnv().execute();
     } else {
-      console.log('Please enter at least one GitHub username.');
+      alert('Please enter at least one GitHub username.');
     }
   });
 });
